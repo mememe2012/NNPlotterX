@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Neural Canvas — 神经网络绘图器</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./models.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><path d="m7.7 7.3 2.8 3.2m3 0 2.8-3.2m-8.6 9.4 2.8-3.2m3 0 2.8 3.2"/></svg>
+        </div>
+        <div><div class="brand-name">Neural Canvas</div><div class="brand-caption">NNPlotterX</div></div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="language-toggle" aria-label="Switch language" title="Switch language">中</button>
+        <button class="icon-button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+          <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.6 8.6 0 1 0 20.2 15.4Z"/></svg>
+        </button>
+        <div class="export-wrap">
+          <button class="export-button" id="export-toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 16v4h14v-4"/></svg>
+            <span data-i18n="export">导出</span>
+          </button>
+          <div class="export-menu" id="export-menu">
+            <button data-export="png" data-i18n="exportPng">导出为 PNG</button>
+            <button data-export="svg" data-i18n="exportSvg">导出为 SVG</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-heading">
+      <div><h1 data-i18n="pageTitle">神经网络绘图器</h1><p class="subtitle" data-i18n="pageSubtitle">设计、预览并导出你的网络架构</p></div>
+    </div>
+
+    <main class="workspace">
+      <section class="main-column">
+        <div class="canvas-card">
+          <div class="canvas-toolbar">
+            <div class="view-switch" role="tablist" aria-label="Visualization mode">
+              <button class="view-button active" data-view="flat" role="tab" aria-selected="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 7h6v6H7z"/></svg><span data-i18n="flatView">神经元</span></button>
+              <button class="view-button" data-view="3d" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m10 2 7 4v8l-7 4-7-4V6l7-4Z"/><path d="m3 6 7 4 7-4m-7 4v8"/></svg><span data-i18n="threeDView">3D 视图</span></button>
+              <button class="view-button" data-view="deep" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="15" r="1.5" fill="currentColor"/></svg><span data-i18n="deepView">深度学习视图</span></button>
+            </div>
+            <div class="canvas-actions">
+              <button class="icon-button" id="zoom-out" aria-label="Zoom out" title="缩小"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4M6 8.5h5"/></svg></button>
+              <button class="icon-button" id="zoom-in" aria-label="Zoom in" title="放大"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4M6 8.5h5m-2.5-2.5v5"/></svg></button>
+              <button class="icon-button" id="fit-view" aria-label="Fit view" title="适应画布"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button>
+              <button class="icon-button" id="reset-rotation" aria-label="Reset 3D rotation" title="复位 3D 视角" hidden><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4.2 8A6 6 0 1 1 4 12"/><path d="M4.2 3.8V8H8"/></svg></button>
+            </div>
+          </div>
+          <div class="canvas-viewport" id="canvas-viewport"><svg id="network-svg" xmlns="http://www.w3.org/2000/svg" role="img"></svg></div>
+          <div class="canvas-footer">
+            <div class="legend">
+              <span class="legend-item"><i class="legend-dot"></i><span data-i18n="legendHidden">全连接层</span></span>
+              <span class="legend-item"><i class="legend-dot feature"></i><span data-i18n="legendFeature">特征提取</span></span>
+              <span class="legend-item"><i class="legend-dot output"></i><span data-i18n="legendOutput">输出层</span></span>
+            </div>
+            <span id="canvas-hint" data-i18n="canvasHint">每一列代表一层，每个圆点代表一个神经元 · 滚动查看完整网络</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-column">
+        <section class="editor-card">
+          <div class="card-heading">
+            <div><div class="card-title" data-i18n="editorTitle">网络结构</div><div class="card-description" data-i18n="editorDescription">选择示例、导入模型或自定义网络</div></div>
+            <span class="template-label" data-i18n="editable">可编辑</span>
+          </div>
+          <div class="preset-area">
+            <select class="preset-select" id="preset-select" aria-label="Choose model architecture"></select>
+          </div>
+          <div class="import-row">
+            <button class="import-button" id="import-onnx">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 13V3m0 0L6.5 6.5M10 3l3.5 3.5"/><path d="M4 11v5h12v-5"/></svg>
+              <span data-i18n="importOnnx">导入 ONNX 模型</span>
+            </button>
+            <input id="onnx-file" type="file" accept=".onnx,application/octet-stream" hidden>
+          </div>
+          <div class="mode-switch" role="tablist" aria-label="Architecture editor">
+            <button class="mode-button active" data-mode="visual" role="tab" aria-selected="true" data-i18n="visualEditor">图形编辑</button>
+            <button class="mode-button" data-mode="json" role="tab" aria-selected="false">JSON</button>
+          </div>
+          <div class="visual-editor active" id="visual-editor"></div>
+          <div class="editor-area hidden" id="json-editor"><textarea id="architecture-input" aria-label="Network architecture JSON" spellcheck="false"></textarea></div>
+          <div class="editor-error" id="editor-error" role="alert"></div>
+          <div class="editor-actions">
+            <span class="schema-hint" data-i18n="schemaHint">逐层编辑神经元数与激活函数</span>
+            <button class="apply-button" id="apply-architecture" data-i18n="apply">应用结构</button>
+          </div>
+        </section>
+
+        <section class="summary-card">
+          <div class="summary-head"><div><div class="summary-name" id="summary-name">MLP Classifier</div><div class="card-description" data-i18n="overview">架构概览</div></div><span class="summary-tag" data-i18n="ready">就绪</span></div>
+          <div class="summary-stats">
+            <div class="stat"><div class="stat-value" id="layer-count">—</div><div class="stat-label" data-i18n="layers">网络层数</div></div>
+            <div class="stat"><div class="stat-value" id="parameter-count">—</div><div class="stat-label" data-i18n="parameters">估算参数量</div></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+</body>
+</html>
